@@ -32,6 +32,8 @@ void findByPrefix(char* buffer, char* prefix, struct buffer_set* set)
 		if(!current) break;
 		set->locations[i] = current;
 
+		if(i > 0) current[-1] = '\0';
+
 		if(i > 0) set->lengths[i - 1] = current - previous;
 		i++;
 
@@ -42,7 +44,7 @@ void findByPrefix(char* buffer, char* prefix, struct buffer_set* set)
 	set->count = i;
 }
 
-
+ 
 /**
  * Places contents of file into the data struct.
  * Assumes that the code raw buffer has been allocated.
@@ -58,11 +60,11 @@ struct code load(void* file, char* buffer, int bufferLength)
 	c.buffer = buffer;
 	c.bufferLength = bufferLength;
 
-	findByPrefix(buffer, BIND_VAL_PREFIX, &c.bind_val_set);
+	//findByPrefix(buffer, BIND_VAL_PREFIX, &c.bind_val_set);
 	findByPrefix(buffer, BIND_FUNC_PREFIX, &c.bind_func_set);
-	findByPrefix(buffer, BIND_ALIAS_PREFIX, &c.bind_alias_set);
-	findByPrefix(buffer, BIND_TYPE_PREFIX, &c.bind_type_set);
-	findByPrefix(buffer, DEFINE_PREFIX, &c.define_set);
+	//findByPrefix(buffer, BIND_ALIAS_PREFIX, &c.bind_alias_set);
+	//findByPrefix(buffer, BIND_TYPE_PREFIX, &c.bind_type_set);
+	//findByPrefix(buffer, DEFINE_PREFIX, &c.define_set);
 	
 	return c;
 }
@@ -149,7 +151,8 @@ int main(int argc, char* argv[])
 
 	for(int i = 0; i < c.bind_func_set.count; i++)
 	{
-		printf("----%.*s\nlength:%d\n", c.bind_func_set.lengths[i], c.bind_func_set.locations[i], c.bind_func_set.lengths[i]);
+		//printf("----%.*s\nlength:%d\n", c.bind_func_set.lengths[i], c.bind_func_set.locations[i], c.bind_func_set.lengths[i]);
+		printf("------%s\n", c.bind_func_set.locations[i]);
 	}
 
 
