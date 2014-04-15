@@ -1,0 +1,74 @@
+
+
+(define xtlang-parse (sys:open-dylib "xtlang-parse.dylib"))
+
+(bind-val BUFFER_SIZE i32 1000000)
+(bind-type string-set |10,i8*|)
+(bind-type int-set |10,i32|)
+(bind-type buffer_set <string-set,int-set,i32>)
+(bind-type code <i8*,i32,i32,i32,i1,double,buffer_set,buffer_set,buffer_set,buffer_set,buffer_set>)
+(bind-val BUFFER i8*)
+(bind-val c code)
+
+(bind-lib xtlang-parse load [code,i8*,i8*,i32]*)
+
+(bind-func alloc-buffer
+  (lambda ()
+  	(memzone 1000000
+    	(let ((x:i8* (zalloc BUFFER_SIZE)))
+    		(set! BUFFER x)))))
+
+(bind-func load-code
+  (lambda ()
+    (let ((cl (load "vis.cache" BUFFER BUFFER_SIZE)))
+    		(set! c cl)
+    		void)))
+
+(bind-func get-time
+  (lambda ()
+  	(tref c 5)))
+
+(bind-func get-text
+  (lambda ()
+  	(tref c 0)))
+
+(load-code)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define width 1024.0)
+(define height 768.0)
+(bind-val width float 1024.0)
+(bind-val height float 768.0)
+(define fullscreen #f)
+
+(define *gl-ctx* (gl:make-ctx ":0.0" fullscreen 0.0 0.0 width height))
+
+(sys:load "libs/external/drawtext.xtm")
+
+(bind-func gl_render
+  ;; put the path to any TrueType (.ttf) font file here
+  (let ((font (dtx_open_font "assets/fonts/Arial.ttf" 24)))
+    (if (null? font)
+	(printf "Error opening font.\n"))
+    (lambda ()
+      (glClear GL_COLOR_BUFFER_BIT)
+      (glLoadIdentity)
+      ;; scale so we can see the text in the window
+      (glScaled 0.002 0.0024 0.00)
+      ;(glRotated (* 360.0 (random)) (random) 0.0 1.0)
+      ;; set the RGB color for the text
+      (glColor3d (random) (random) (random))
+      (load-code)
+      (dtx_string (get-text)))))
+
+(define gl-loop
+  (lambda (time delta-t)
+    (gl_render)
+    (gl:swap-buffers *gl-ctx*)
+    (callback (+ time (* *second* delta-t) 0.5)
+	      'gl-loop
+	      (+ time (* *second* delta-t))
+	      delta-t)))
+
+(gl-loop (now) 1/32)
