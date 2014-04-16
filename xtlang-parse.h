@@ -7,12 +7,12 @@
 #define SIZE 10
 #define BUFFER_SIZE 1000000
 
-struct buffer_set
-{
-	char* locations[SIZE];
-	int lengths[SIZE];
-	int count;
-};
+// struct buffer_set
+// {
+// 	char* locations[SIZE];
+// 	int lengths[SIZE];
+// 	int count;
+// };
 
 //Grab parsed code from a text file
 struct code 
@@ -22,15 +22,12 @@ struct code
 
 	int startCursor;
 	int endCursor;
-	bool isRegionSelected;
 
 	double time;
 
-	struct buffer_set bind_val_set;
-	struct buffer_set bind_func_set;
-	struct buffer_set bind_alias_set;
-	struct buffer_set bind_type_set;
-	struct buffer_set define_set;
+	char* funcText[SIZE];
+	int funcLengths[SIZE];
+	int funcCount;
 };
 
 struct code load(void* file, char* buffer, int bufferLength);

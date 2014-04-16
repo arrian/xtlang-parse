@@ -3,18 +3,15 @@
 (define xtlang-parse (sys:open-dylib "xtlang-parse.dylib"))
 
 (bind-val BUFFER_SIZE i32 1000000)
-(bind-type string-set |10,i8*|)
-(bind-type int-set |10,i32|)
-(bind-type buffer_set <string-set,int-set,i32>)
-(bind-type code <i8*,i32,i32,i32,i1,double,buffer_set,buffer_set,buffer_set,buffer_set,buffer_set>)
 (bind-val BUFFER i8*)
+(bind-type code <i8*,i32,i32,i32,double,|10,i8*|,|10,i32|,i32>)
 (bind-val c code)
 
 (bind-lib xtlang-parse load [code,i8*,i8*,i32]*)
 
 (bind-func alloc-buffer
   (lambda ()
-  	(memzone 1000000
+  	(memzone 10000000
     	(let ((x:i8* (zalloc BUFFER_SIZE)))
     		(set! BUFFER x)))))
 
@@ -32,6 +29,25 @@
   (lambda ()
   	(tref c 0)))
 
+(bind-func get-func-text0
+  (lambda (index:i64)
+    (aref (tref c 5) 0)))
+(bind-func get-func-text1
+  (lambda (index:i64)
+    (aref (tref c 5) 1)))
+(bind-func get-func-text2
+  (lambda (index:i64)
+    (aref (tref c 5) 2)))
+(bind-func get-func-text3
+  (lambda (index:i64)
+    (aref (tref c 5) 3)))
+
+(bind-func get-func-count
+  (lambda ()
+    (tref c 7)))
+
+
+
 (load-code)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,19 +64,24 @@
 
 (bind-func gl_render
   ;; put the path to any TrueType (.ttf) font file here
-  (let ((font (dtx_open_font "assets/fonts/Arial.ttf" 24)))
+  (let ((font (dtx_open_font "assets/fonts/Consolas.ttf" 24)))
     (if (null? font)
 	(printf "Error opening font.\n"))
     (lambda ()
       (glClear GL_COLOR_BUFFER_BIT)
       (glLoadIdentity)
       ;; scale so we can see the text in the window
-      (glScaled 0.002 0.0024 0.00)
+      (glScaled 0.0015 0.002 0.00)
+
       ;(glRotated (* 360.0 (random)) (random) 0.0 1.0)
       ;; set the RGB color for the text
-      (glColor3d (random) (random) (random))
-      (load-code)
-      (dtx_string (get-text)))))
+      (glColor4d 0.0 1.0 0.0 0.5)
+      ;;(load-code)
+      (dtx_string (get-func-text2 0))
+
+      (glTranslated 0.0 -150.0 0.0)
+      (dtx_string (get-func-text0 0))
+      )))
 
 (define gl-loop
   (lambda (time delta-t)
@@ -71,4 +92,4 @@
 	      (+ time (* *second* delta-t))
 	      delta-t)))
 
-(gl-loop (now) 1/32)
+(gl-loop (now) 1/4)

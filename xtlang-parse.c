@@ -22,7 +22,7 @@ void loadFile(char* filename, char* buffer, int bufferLength)
 }
 
 
-void findByPrefix(char* buffer, char* prefix, struct buffer_set* set)
+void findByPrefix(char* buffer, char* prefix, struct code* c)
 {
 	int i = 0;
 	char* previous = buffer;
@@ -30,18 +30,18 @@ void findByPrefix(char* buffer, char* prefix, struct buffer_set* set)
 	{
 		char* current = strstr(previous, prefix);
 		if(!current) break;
-		set->locations[i] = current;
+		c->funcText[i] = current;
 
 		if(i > 0) current[-1] = '\0';
 
-		if(i > 0) set->lengths[i - 1] = current - previous;
+		if(i > 0) c->funcLengths[i - 1] = current - previous;
 		i++;
 
 		previous = current + 1;
 	}
 
-	if(i > 0) set->lengths[i - 1] = strlen(previous);
-	set->count = i;
+	if(i > 0) c->funcLengths[i - 1] = strlen(previous);
+	c->funcCount = i;
 }
 
  
@@ -56,12 +56,11 @@ struct code load(void* file, char* buffer, int bufferLength)
 	struct code c;
 	
 	sscanf(buffer, "%i,%i,%lf\n", &c.startCursor, &c.endCursor, &c.time);
-	c.isRegionSelected = (c.startCursor != c.endCursor);
 	c.buffer = buffer;
 	c.bufferLength = bufferLength;
 
 	//findByPrefix(buffer, BIND_VAL_PREFIX, &c.bind_val_set);
-	findByPrefix(buffer, BIND_FUNC_PREFIX, &c.bind_func_set);
+	findByPrefix(buffer, BIND_FUNC_PREFIX, &c);
 	//findByPrefix(buffer, BIND_ALIAS_PREFIX, &c.bind_alias_set);
 	//findByPrefix(buffer, BIND_TYPE_PREFIX, &c.bind_type_set);
 	//findByPrefix(buffer, DEFINE_PREFIX, &c.define_set);
@@ -149,10 +148,10 @@ int main(int argc, char* argv[])
 	struct code c = load("vis.cache", buffer, BUFFER_SIZE);
 	//printf("%lf\n", c.time);
 
-	for(int i = 0; i < c.bind_func_set.count; i++)
+	for(int i = 0; i < c.funcCount; i++)
 	{
 		//printf("----%.*s\nlength:%d\n", c.bind_func_set.lengths[i], c.bind_func_set.locations[i], c.bind_func_set.lengths[i]);
-		printf("------%s\n", c.bind_func_set.locations[i]);
+		printf("------%s\n", c.funcText[i]);
 	}
 
 
